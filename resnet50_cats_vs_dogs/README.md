@@ -10,7 +10,7 @@ Among them, SwanLab plays a role in **recording hyperparameters**, **tracking me
 
 
 
-# Pretrain
+## Installation
 
 Install the necessary libraries.
 

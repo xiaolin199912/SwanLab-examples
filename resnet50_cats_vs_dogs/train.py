@@ -20,8 +20,8 @@ if __name__ == "__main__":
         config={
             "datasets": "cats_and_dogs",
             "optim": "Adam",
+            "criterion": "CrossEntropyLoss",
             "lr": lr,
-            "criterion": "torch.nn.CrossEntropyLoss",
             "batch_size": batch_size,
             "num_epochs": num_epochs,
             "image_size": image_size,

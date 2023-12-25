@@ -41,8 +41,8 @@ if __name__ == "__main__":
     model.fc = torch.nn.Linear(in_features, num_classes)
 
     # Train
-    device = torch.device('mps')
-    # device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    # device = torch.device('mps')
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)

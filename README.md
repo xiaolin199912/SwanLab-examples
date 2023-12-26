@@ -12,6 +12,9 @@
 
 ## Available example
 
-- [Image classification (ResNet) on the cat and dog dataset](https://github.com/SwanHubX/SwanLab-examples/tree/main/resnet50_cats_vs_dogs)
+- [Image classification (ResNet) on the cat and dog dataset](https://github.com/SwanHubX/SwanLab-examples/tree/main/pytorch/resnet50_cats_vs_dogs)
+
+- [plain_net_mnist](https://github.com/SwanHubX/SwanLab-examples/tree/main/pytorch/plain_net_mnist)
 
 - Updating...
+

@@ -46,12 +46,13 @@ def train(args, model, device, train_loader, optimizer, epoch):
         optimizer.step()
         if batch_idx % args.log_interval == 0:
             log_info = {
-                'Train Epoch': '{} [{}/{} ({:.0f}%)]'.format(epoch, batch_idx * len(data), 
-                                                            len(train_loader.dataset),100. * batch_idx / len(train_loader)),
+                'Train Epoch': '{} [{}/{} ({:.0f}%)]'.format(epoch, batch_idx * len(data),
+                                                             len(train_loader.dataset),
+                                                             100. * batch_idx / len(train_loader)),
                 'Loss': '{:.6f}'.format(loss.item())
             }
             print(log_info)
-            swanlab.log(log_info)
+            swanlab.log({'train_loss': loss.item()})
             if args.dry_run:
                 break
 
@@ -70,11 +71,13 @@ def test(model, device, test_loader):
 
     test_loss /= len(test_loader.dataset)
     log_info = {
-        "Average loss": "{:.4f}".format(test_loss), 
-        "Accuracy": "{}/{} ({:.0f}%".format(correct, len(test_loader.dataset),100. * correct / len(test_loader.dataset))
-        }
+        "Average loss": "{:.4f}".format(test_loss),
+        "Accuracy": "{}/{} ({:.0f}%".format(correct, len(test_loader.dataset),
+                                            100. * correct / len(test_loader.dataset))
+    }
     print(log_info)
-    swanlab.log(log_info)
+    swanlab.log({'test_loss': test_loss,
+                 'test_acc': 100. * correct / len(test_loader.dataset)})
 
 
 def main():
@@ -134,15 +137,15 @@ def main():
         train_kwargs.update(cuda_kwargs)
         test_kwargs.update(cuda_kwargs)
 
-    transform=transforms.Compose([
+    transform = transforms.Compose([
         transforms.ToTensor(),
         transforms.Normalize((0.1307,), (0.3081,))
-        ])
+    ])
     dataset1 = datasets.MNIST('./data', train=True, download=True,
-                       transform=transform)
+                              transform=transform)
     dataset2 = datasets.MNIST('./data', train=False,
-                       transform=transform)
-    train_loader = torch.utils.data.DataLoader(dataset1,**train_kwargs)
+                              transform=transform)
+    train_loader = torch.utils.data.DataLoader(dataset1, **train_kwargs)
     test_loader = torch.utils.data.DataLoader(dataset2, **test_kwargs)
 
     model = Net().to(device)

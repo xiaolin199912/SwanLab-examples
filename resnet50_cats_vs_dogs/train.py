@@ -111,6 +111,4 @@ if __name__ == "__main__":
                 torch.save(model.state_dict(), 'checkpoint/best_checkpoint.pth')
                 print("Saved better model with accuracy: {:.2f}%".format(best_accuracy))
 
-        swanlab.log({'Progress': epoch/num_epochs})
-
     print("Training complete")

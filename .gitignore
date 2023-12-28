@@ -2,3 +2,4 @@
 .DS_Store
 *.pth
 **/swanlog
+**/__pycache__

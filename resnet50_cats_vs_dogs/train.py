@@ -7,11 +7,23 @@ import os
 
 
 if __name__ == "__main__":
-    num_epochs = 10
+    num_epochs = 40
     lr = 1e-4
-    batch_size = 8
+    batch_size = 16
     image_size = 256
     num_classes = 2
+
+    try:
+        use_mps = torch.backends.mps.is_available()
+    except AttributeError:
+        use_mps = False
+
+    if torch.cuda.is_available():
+        device = "cuda"
+    elif use_mps:
+        device = "mps"
+    else:
+        device = "cpu"
 
     # Initialize swanlab
     swanlab.init(
@@ -26,6 +38,7 @@ if __name__ == "__main__":
             "num_epochs": num_epochs,
             "image_size": image_size,
             "num_class": num_classes,
+            "device": device
         }
     )
 
@@ -41,9 +54,7 @@ if __name__ == "__main__":
     model.fc = torch.nn.Linear(in_features, num_classes)
 
     # Train
-    # device = torch.device('mps')
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model.to(device)
+    model.to(torch.device(device))
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 

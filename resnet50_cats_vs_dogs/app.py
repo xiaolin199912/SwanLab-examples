@@ -43,7 +43,7 @@ def predict(image):
 
 
 # Define the path to your model checkpoint
-checkpoint_path = 'checkpoint/lastest_checkpoint.pth'  # replace with your checkpoint path
+checkpoint_path = 'checkpoint/best_checkpoint.pth'  # replace with your checkpoint path
 num_classes = 2  # as defined in the training script
 model = load_model(checkpoint_path, num_classes)
 

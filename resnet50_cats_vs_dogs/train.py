@@ -5,13 +5,44 @@ from torch.utils.data import DataLoader
 from load_datasets import DatasetLoader
 import os
 
+# Define train function
+def train(model, device, train_loader, optimizer, criterion, epoch):
+    model.train()
+    for iter, (inputs, labels) in enumerate(train_loader):
+        inputs, labels = inputs.to(device), labels.to(device)
+        optimizer.zero_grad()
+        outputs = model(inputs)
+        loss = criterion(outputs, labels)
+        loss.backward()
+        optimizer.step()
+        print('Epoch [{}/{}], Iteration [{}/{}], Loss: {:.4f}'.format(epoch, num_epochs, iter + 1, len(TrainDataLoader), loss.item()))
+        swanlab.log({"train_loss": loss.item()})
+
+# Define test function
+def test(model, device, test_loader, epoch):
+    model.eval()
+    correct = 0
+    total = 0
+    with torch.no_grad():
+        for inputs, labels in test_loader:
+            inputs, labels = inputs.to(device), labels.to(device)
+            outputs = model(inputs)
+            _, predicted = torch.max(outputs.data, 1)
+            total += labels.size(0)
+            correct += (predicted == labels).sum().item()
+    accuracy = correct / total * 100
+    print('Accuracy: {:.2f}%'.format(accuracy))
+    swanlab.log({"validation_acc": accuracy}, step=epoch)
+    return accuracy
+
 
 if __name__ == "__main__":
-    num_epochs = 40
+    num_epochs = 20
     lr = 1e-4
-    batch_size = 16
-    image_size = 256
+    batch_size = 8
+    image_size = 512
     num_classes = 2
+    seed = 2024
 
     try:
         use_mps = torch.backends.mps.is_available()
@@ -25,12 +56,15 @@ if __name__ == "__main__":
     else:
         device = "cpu"
 
+    torch.manual_seed(seed)
+
     # Initialize swanlab
     swanlab.init(
         experiment_name="ResNet50",
         description="Train ResNet50 for cat and dog classification.",
         config={
             "datasets": "cats_and_dogs",
+            "model": "resnet50",
             "optim": "Adam",
             "criterion": "CrossEntropyLoss",
             "lr": lr,
@@ -38,17 +72,20 @@ if __name__ == "__main__":
             "num_epochs": num_epochs,
             "image_size": image_size,
             "num_class": num_classes,
-            "device": device
+            "device": device,
+            "seed": seed,
+            "augmentation": "RandomHorizontalFlip+RandomRotation(15)+ColorJitter"
         }
     )
 
-    TrainDataset = DatasetLoader("datasets/train.csv", image_size=(image_size, image_size))
-    ValDataset = DatasetLoader("datasets/val.csv", image_size=(image_size, image_size))
+    TrainDataset = DatasetLoader("datasets/train.csv", image_size=(image_size, image_size), mode="train")
+    ValDataset = DatasetLoader("datasets/val.csv", image_size=(image_size, image_size), mode="test")
     TrainDataLoader = DataLoader(TrainDataset, batch_size=batch_size, shuffle=True)
     ValDataLoader = DataLoader(ValDataset, batch_size=1, shuffle=False)
 
     # Load pre-trained model.
     model = torchvision.models.resnet50(pretrained=True)
+
     # Replace the last fully connected layer.
     in_features = model.fc.in_features
     model.fc = torch.nn.Linear(in_features, num_classes)
@@ -58,39 +95,22 @@ if __name__ == "__main__":
     criterion = torch.nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
 
-    for epoch in range(num_epochs):
-        for iter, (inputs, labels) in enumerate(TrainDataLoader):
-            inputs, labels = inputs.to(device), labels.to(device)
-            optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
-            loss.backward()
-            optimizer.step()
+    best_accuracy = 0
 
-            print('Epoch [{}/{}], Iteration [{}/{}], Loss: {:.4f}'.format(epoch + 1, num_epochs, iter + 1,
-                                                                          len(TrainDataLoader), loss.item()))
-            swanlab.log({"train_loss": loss.item()})
+    for epoch in range(1, num_epochs+1):
+        train(model, device, TrainDataLoader, optimizer, criterion, epoch)  # Train for one epoch
 
-    # Test
-    model.eval()
-    correct = 0
-    total = 0
+        if epoch % 4 == 0:  # Test every 4 epochs
+            accuracy = test(model, device, ValDataLoader, epoch)
 
-    with torch.no_grad():
-        for inputs, labels in ValDataLoader:
-            inputs, labels = inputs.to(device), labels.to(device)
-            outputs = model(inputs)
-            _, predicted = torch.max(outputs.data, 1)
-            total += labels.size(0)
-            correct += (predicted == labels).sum().item()
+            # Save the best model
+            if accuracy > best_accuracy:
+                best_accuracy = accuracy
+                if not os.path.exists("checkpoint"):
+                    os.makedirs("checkpoint")
+                torch.save(model.state_dict(), 'checkpoint/best_checkpoint.pth')
+                print("Saved better model with accuracy: {:.2f}%".format(best_accuracy))
 
-    print('Accuracy: {:.2f}%'.format(correct / total * 100))
-    swanlab.log({"validation_acc": correct / total * 100})
+        swanlab.log({'Progress': epoch/num_epochs})
 
-    # Save Checkpoint
-    if not os.path.exists("checkpoint"):
-        # 如果文件夹不存在，则创建文件夹
-        os.makedirs("checkpoint")
-
-    torch.save(model.state_dict(), 'checkpoint/lastest_checkpoint.pth')
-    print("The checkpoint has been saved in './checkpoint'")
+    print("Training complete")

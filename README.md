@@ -11,6 +11,7 @@
 
 
 ## Available example
+- [hello_world](https://github.com/SwanHubX/SwanLab-examples/tree/main/Hello_World)
 
 - [plain_net_mnist](https://github.com/SwanHubX/SwanLab-examples/tree/main/plain_net_mnist)
 

@@ -12,7 +12,7 @@ Among them, SwanLab plays a role in **recording hyperparameters**, **tracking me
 
 ## Installation
 
-Install the necessary libraries.
+Install the necessary libraries: 
 
 ```
 pip install -r requirements.txt
@@ -24,7 +24,7 @@ pip install -r requirements.txt
 
 Download the dataset to the `datasets` folder in this directory.
 
-[Google Drive (9.9MB)](https://drive.google.com/file/d/11Pv0kzi56QMNoRrMOFuobnTwXREOLAMm/view?usp=drive_link)
+[Google Drive (9.9MB)](https://drive.google.com/file/d/11Pv0kzi56QMNoRrMOFuobnTwXREOLAMm/view?usp=drive_link)｜[百度云(提取码b3td)](https://pan.baidu.com/s/1A_BACGwMqZ7Yn6R-fI3-bQ)
 
 
 

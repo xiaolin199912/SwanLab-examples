@@ -1,1 +1,1 @@
-swanlab~=0.1.2
+swanlab>=0.1.2

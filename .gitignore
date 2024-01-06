@@ -3,3 +3,5 @@
 *.pth
 **/swanlog
 **/__pycache__
+**/datasets/**
+!**/datasets/.gitkeep

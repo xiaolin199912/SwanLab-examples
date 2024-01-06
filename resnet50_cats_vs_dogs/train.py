@@ -1,9 +1,11 @@
 import torch
 import torchvision
+from torchvision.models import ResNet50_Weights
 import swanlab
 from torch.utils.data import DataLoader
 from load_datasets import DatasetLoader
 import os
+
 
 # Define train function
 def train(model, device, train_loader, optimizer, criterion, epoch):
@@ -15,8 +17,10 @@ def train(model, device, train_loader, optimizer, criterion, epoch):
         loss = criterion(outputs, labels)
         loss.backward()
         optimizer.step()
-        print('Epoch [{}/{}], Iteration [{}/{}], Loss: {:.4f}'.format(epoch, num_epochs, iter + 1, len(TrainDataLoader), loss.item()))
+        print('Epoch [{}/{}], Iteration [{}/{}], Loss: {:.4f}'.format(epoch, num_epochs, iter + 1, len(TrainDataLoader),
+                                                                      loss.item()))
         swanlab.log({"train_loss": loss.item()})
+
 
 # Define test function
 def test(model, device, test_loader, epoch):
@@ -83,8 +87,8 @@ if __name__ == "__main__":
     TrainDataLoader = DataLoader(TrainDataset, batch_size=batch_size, shuffle=True)
     ValDataLoader = DataLoader(ValDataset, batch_size=1, shuffle=False)
 
-    # Load pre-trained model.
-    model = torchvision.models.resnet50(pretrained=True)
+    # Load the pre-trained ResNet50 model
+    model = torchvision.models.resnet50(weights=ResNet50_Weights.IMAGENET1K_V2)
 
     # Replace the last fully connected layer.
     in_features = model.fc.in_features
@@ -97,7 +101,7 @@ if __name__ == "__main__":
 
     best_accuracy = 0
 
-    for epoch in range(1, num_epochs+1):
+    for epoch in range(1, num_epochs + 1):
         train(model, device, TrainDataLoader, optimizer, criterion, epoch)  # Train for one epoch
 
         if epoch % 4 == 0:  # Test every 4 epochs
